@@ -302,7 +302,9 @@ namespace OCR
             }
             catch (Exception e)
             {
+                return 0;
                 throw new Exception("toDouble > " + e.Message);
+               
             }
         }
 
@@ -569,6 +571,7 @@ namespace OCR
                 }
                 else if ((matchPrice && matchQuantity) || (matchQuantity && matchTotalValue))
                 {
+
                     r = new Row();
                     try
                     {
@@ -578,11 +581,17 @@ namespace OCR
                         if (columns[2] != -1 && matchQuantity) r.Quantity = Convert.ToDouble(dr[columns[2]].ToString().Replace(",", "."));
                         if (columns[3] != -1 && matchPrice) r.Price = toDouble(dr[columns[3]].ToString());
                         if (columns[4] != -1) r.Discount = dr[columns[4]].ToString(); else { r.Discount = ""; }
-                        if (columns[5] != -1 && matchTotalValue) r.TotalValue = toDouble(dr[columns[5]].ToString());
-
+                        if (columns[5] != -1 && matchTotalValue) { r.TotalValue = toDouble(dr[columns[5]].ToString()); }
+                        Console.Write("Q {0} {2}  P {1} {3} \n", matchQuantity, matchPrice, dr[columns[2]], dr[columns[3]]);
                         rows.Add(r);
+
                     }
-                    catch { continue; }
+
+                    catch
+                    {
+                    //    rows.Add(r);
+                        continue;
+                    }
                 }
 
                 matchCode = false;
