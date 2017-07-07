@@ -304,7 +304,7 @@ namespace OCR
             {
                 return 0;
                 throw new Exception("toDouble > " + e.Message);
-               
+
             }
         }
 
@@ -575,21 +575,33 @@ namespace OCR
                     r = new Row();
                     try
                     {
-                        if (columns[0] != -1 && !String.IsNullOrEmpty(dr[columns[0]].ToString())) { r.Code = dr[columns[0]].ToString(); } else { r.Code = ""; }
+                        if (columns[0] != -1 && !String.IsNullOrEmpty(dr[columns[0]].ToString())) { r.Code = dr[columns[0]].ToString(); }
+                        else if (!matchCode)
+                        {
+                            foreach (String patt in pattCode)
+                            {
+                                string pattern = "(" + patt + ")";
+                                Match mtch = Regex.Match(dr[columns[1]].ToString(), pattern);
+                                if (mtch.Success)
+                                {
+                                    r.Code = mtch.Groups[1].Value;
+                                    break;
+                                }
+                            }                    
+                        }
+                        else { r.Code = ""; }
 
                         if (columns[1] != -1) r.Description = dr[columns[1]].ToString();
                         if (columns[2] != -1 && matchQuantity) r.Quantity = Convert.ToDouble(dr[columns[2]].ToString().Replace(",", "."));
                         if (columns[3] != -1 && matchPrice) r.Price = toDouble(dr[columns[3]].ToString());
                         if (columns[4] != -1) r.Discount = dr[columns[4]].ToString(); else { r.Discount = ""; }
                         if (columns[5] != -1 && matchTotalValue) { r.TotalValue = toDouble(dr[columns[5]].ToString()); }
-                        Console.Write("Q {0} {2}  P {1} {3} \n", matchQuantity, matchPrice, dr[columns[2]], dr[columns[3]]);
                         rows.Add(r);
 
                     }
-
                     catch
                     {
-                    //    rows.Add(r);
+                        rows.Add(r);
                         continue;
                     }
                 }
