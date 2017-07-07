@@ -561,92 +561,35 @@ namespace OCR
                         rows.Add(r);
                     }
                     catch { continue; }
-
-
-
-
-
                 }
-                    else if ((matchPrice && matchQuantity) || (matchQuantity && matchTotalValue))
+                else if ((matchPrice && matchQuantity) || (matchQuantity && matchTotalValue))
+                {
+                    r = new Row();
+                    try
                     {
-                        r = new Row();
-                        try
-                        {
-                            if (columns[0] != -1 && !String.IsNullOrEmpty(dr[columns[0]].ToString())) { r.Code = dr[columns[0]].ToString(); } else { r.Code = ""; }
+                        if (columns[0] != -1 && !String.IsNullOrEmpty(dr[columns[0]].ToString())) { r.Code = dr[columns[0]].ToString(); } else { r.Code = ""; }
 
-                            if (columns[1] != -1) r.Description = dr[columns[1]].ToString();
-                            if (columns[2] != -1 && matchQuantity) r.Quantity = Convert.ToDouble(dr[columns[2]].ToString().Replace(",", "."));
-                            if (columns[3] != -1 && matchPrice) r.Price = toDouble(dr[columns[3]].ToString());
-                            if (columns[4] != -1) r.Discount = dr[columns[4]].ToString(); else { r.Discount = ""; }
-                            if (columns[5] != -1 && matchTotalValue) r.TotalValue = toDouble(dr[columns[5]].ToString());
+                        if (columns[1] != -1) r.Description = dr[columns[1]].ToString();
+                        if (columns[2] != -1 && matchQuantity) r.Quantity = Convert.ToDouble(dr[columns[2]].ToString().Replace(",", "."));
+                        if (columns[3] != -1 && matchPrice) r.Price = toDouble(dr[columns[3]].ToString());
+                        if (columns[4] != -1) r.Discount = dr[columns[4]].ToString(); else { r.Discount = ""; }
+                        if (columns[5] != -1 && matchTotalValue) r.TotalValue = toDouble(dr[columns[5]].ToString());
 
-                            rows.Add(r);
-                        }
-                        catch { continue; }
+                        rows.Add(r);
                     }
-
-
-                    matchCode = false;
-                    matchDescription = false;
-                    matchQuantity = false;
-                    matchPrice = false;
-                    matchDiscount = false;
-                    matchTotalValue = false;
-
+                    catch { continue; }
                 }
 
-                insertDataToSQL(rows, docName);
+                matchCode = false;
+                matchDescription = false;
+                matchQuantity = false;
+                matchPrice = false;
+                matchDiscount = false;
+                matchTotalValue = false;
 
-        
+            }
 
-
-                //    else if ((matchPrice && matchQuantity) || (matchQuantity && matchTotalValue))
-                //    {
-                //        Console.WriteLine("pasuuuuuje");
-                //        r = new Row();
-                //        try
-                //        {
-                //            if (columns[0] != -1 && !String.IsNullOrEmpty(dr[columns[0]].ToString()) && matchCode)
-                //            { 
-                //                r.Code = dr[columns[0]].ToString();
-                //                Console.WriteLine("tutaj");
-                //            }
-                //            else if (!matchCode) //condtion: also empty?
-                //            {
-
-                //                foreach (string patt in pattCode)
-                //                {
-                //                    string pattern = "(" + patt + ")";
-                //                    Match mtch = Regex.Match(dr[columns[1]].ToString(), pattern);
-                //                    Console.WriteLine(pattern);
-                //                    if (mtch.Success) Console.WriteLine(mtch.Groups[1].Value);
-                //                }
-                //            }
-                //            else { r.Code = ""; }
-
-                //            if (columns[1] != -1) r.Description = dr[columns[1]].ToString();
-                //            if (columns[2] != -1 && matchQuantity) r.Quantity = Convert.ToDouble(dr[columns[2]].ToString().Replace(",", "."));
-                //            if (columns[3] != -1 && matchPrice) r.Price = toDouble(dr[columns[3]].ToString());
-                //            if (columns[4] != -1) r.Discount = dr[columns[4]].ToString(); else { r.Discount = ""; }
-                //            if (columns[5] != -1 && matchTotalValue) r.TotalValue = toDouble(dr[columns[5]].ToString());
-
-                //            rows.Add(r);
-                //        }
-                //        catch { continue; }
-                //    }
-
-                //    matchCode = false;
-                //    matchDescription = false;
-                //    matchQuantity = false;
-                //    matchPrice = false;
-                //    matchDiscount = false;
-                //    matchTotalValue = false;
-
-                //}
-
-                //insertDataToSQL(rows, docName);
-
-            
+            insertDataToSQL(rows, docName);
         }
 
 
@@ -712,7 +655,7 @@ namespace OCR
             //    //Console.WriteLine(pattern);
             //    if (mtch.Success) Console.WriteLine(mtch.Groups[1].Value);
 
-                                
+
             //}
 
 
