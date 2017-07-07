@@ -1,0 +1,6 @@
+c:\users\sebastian\documents\visual studio 2013\Projects\OCR\OCR\bin\Debug\OCR.exe.config
+c:\users\sebastian\documents\visual studio 2013\Projects\OCR\OCR\obj\Debug\OCR.csprojResolveAssemblyReference.cache
+c:\users\sebastian\documents\visual studio 2013\Projects\OCR\OCR\bin\Debug\OCR.exe
+c:\users\sebastian\documents\visual studio 2013\Projects\OCR\OCR\bin\Debug\OCR.pdb
+c:\users\sebastian\documents\visual studio 2013\Projects\OCR\OCR\obj\Debug\OCR.exe
+c:\users\sebastian\documents\visual studio 2013\Projects\OCR\OCR\obj\Debug\OCR.pdb
