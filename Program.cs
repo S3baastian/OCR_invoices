@@ -670,48 +670,50 @@ namespace OCR
             var dir = new DirectoryInfo(directory);
             FileInfo[] fi = dir.GetFiles("*.xls");
 
-            //foreach (FileInfo file in fi)
-            //{
-            //    string pathToFile = String.Concat(directory, file);
-            //    bool sonepar = false;
-
-            //    if (file.Name.ToString().Contains("sonepar")) { sonepar = true; }
-
-            //    try
-            //    {
-
-            //        MS_excel ex = new MS_excel(@pathToFile, "Sheet1", false);
-
-            //        //Adding values -1 to the columns array
-            //        int indexOf = 0;
-            //        int[] columns = new int[ex.ds.Tables[0].Columns.Count];
-            //        for (int i = 0; i < ex.ds.Tables[0].Columns.Count - 1; i++) { columns[i] = -1; }
-
-            //        Console.WriteLine(pathToFile);
-
-            //        findColumnsByName(ex, ref columns, ref indexOf);
-
-
-            //        displayRows(ex, columns, indexOf, file.ToString(), sonepar);
-            //    }
-            //    catch (Exception e)
-            //    {
-            //        Console.WriteLine(e);
-            //        continue;
-            //    }
-            //}
-            string[] pattCode = getDataFromSQL("SELECT * FROM Patterns WHERE ColumnName = 'Code'", "Pattern");
-            MS_excel excel = new MS_excel(@"C:\[OCR] hotFolders\sebastian2\done\TEst\0000242004_kod w opisie.xls", "Sheet1", false);
-            foreach (DataRow dr in  excel.ds.Tables[0].Rows) 
+            foreach (FileInfo file in fi)
             {
-                string pattern = "(" + "[a-zA-Z0-9]{2}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{3}" + ")";
-                string test = "PX-0024-OXI SIROS E27 IP23 100W";
-                Match mtch = Regex.Match(test, pattern);
-                //Console.WriteLine(pattern);
-                if (mtch.Success) Console.WriteLine(mtch.Groups[1].Value);
+                string pathToFile = String.Concat(directory, file);
+                bool sonepar = false;
+
+                if (file.Name.ToString().Contains("sonepar")) { sonepar = true; }
+
+                try
+                {
+
+                    MS_excel ex = new MS_excel(@pathToFile, "Sheet1", false);
+
+                    //Adding values -1 to the columns array
+                    int indexOf = 0;
+                    int[] columns = new int[ex.ds.Tables[0].Columns.Count];
+                    for (int i = 0; i < ex.ds.Tables[0].Columns.Count - 1; i++) { columns[i] = -1; }
+
+                    Console.WriteLine(pathToFile);
+
+                    findColumnsByName(ex, ref columns, ref indexOf);
+
+
+                    displayRows(ex, columns, indexOf, file.ToString(), sonepar);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    continue;
+                }
+            }
+
+
+            //string[] pattCode = getDataFromSQL("SELECT * FROM Patterns WHERE ColumnName = 'Code'", "Pattern");
+            //MS_excel excel = new MS_excel(@"C:\[OCR] hotFolders\sebastian2\done\TEst\0000242004_kod w opisie.xls", "Sheet1", false);
+            //foreach (DataRow dr in  excel.ds.Tables[0].Rows) 
+            //{
+            //    string pattern = "(" + "[a-zA-Z0-9]{2}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{3}" + ")";
+            //    string test = "PX-0024-OXI SIROS E27 IP23 100W";
+            //    Match mtch = Regex.Match(test, pattern);
+            //    //Console.WriteLine(pattern);
+            //    if (mtch.Success) Console.WriteLine(mtch.Groups[1].Value);
 
                                 
-            }
+            //}
 
 
 
