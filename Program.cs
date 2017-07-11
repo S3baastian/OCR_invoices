@@ -491,7 +491,7 @@ namespace OCR
                 {
                     if (columns[i] == -1) { break; }
                     regex = new Regex(pat);
-                    if (regex.IsMatch(dr[columns[i]].ToString()))
+                    if (regex.IsMatch(dr[columns[i]].ToString().Replace(" ", "")))
                     {
                         match = true;
                     }
@@ -557,8 +557,8 @@ namespace OCR
                     }
                 }
 
-                Console.WriteLine("Code {0} {1} \n Qty {2} {3} \n Price {4} {5} \n TV {6} {7} \n\n", matchCode, dr[columns[0]].ToString(),
-                    matchQuantity, dr[columns[2]].ToString(), matchPrice, dr[columns[3]].ToString(), matchTotalValue, dr[columns[5]].ToString());
+                //Console.WriteLine("Code {0} {1} \n Qty {2} {3} \n Price {4} {5} \n TV {6} {7} \n\n", matchCode, dr[columns[0]].ToString(),
+                //    matchQuantity, dr[columns[2]].ToString(), matchPrice, dr[columns[3]].ToString(), matchTotalValue, dr[columns[5]].ToString());
 
                 if (sonepar && !String.IsNullOrEmpty(dr[columns[2]].ToString()) && !String.IsNullOrEmpty(dr[columns[3]].ToString()) && excel.ds.Tables[0].Rows.IndexOf(dr) > indexOf)
                 {
@@ -610,35 +610,39 @@ namespace OCR
                 }
                 else if ((matchPrice && matchQuantity) || (matchQuantity && matchTotalValue))
                 {
-                    Console.WriteLine("Pierwsza");
+
                     r = new Row();
 
-                        Console.WriteLine("Pierwsza 2");
-                        if (columns[0] != -1 && !String.IsNullOrEmpty(dr[columns[0]].ToString())) { r.Code = dr[columns[0]].ToString(); }
+                    if (columns[0] != -1 && matchCode) { r.Code = dr[columns[0]].ToString(); }
 
-                        else if (!matchCode && columns[1] != -1)
+                    else if (!matchCode && (columns[1] != -1))
+                    {
+                        foreach (String patt in pattCode)
                         {
-                            foreach (String patt in pattCode)
+                            string pattern = "(" + patt + ")";
+                            Match mtch = Regex.Match(dr[columns[1]].ToString(), pattern);
+                            if (mtch.Success)
                             {
-                                string pattern = "(" + patt + ")";
-                                Match mtch = Regex.Match(dr[columns[1]].ToString(), pattern);
-                                if (mtch.Success)
-                                {
-                                    r.Code = mtch.Groups[1].Value;
-                                    break;
-                                }
+                                r.Code = mtch.Groups[1].Value;
+                                break;
+                            }
+                            else
+                            {
+                                
+                                if (dr[columns[1]].ToString().Length > 29) r.Code = dr[columns[1]].ToString().Substring(0, 28);
+                                else {r.Code = dr[columns[1]].ToString().Substring(0, dr[columns[1]].ToString().Length); }
+                                
                             }
                         }
-                        else { r.Code = ""; }
+                    }
+                    else { r.Code = ""; }
 
-                        if (columns[1] != -1) r.Description = dr[columns[1]].ToString();
-                        if (columns[2] != -1 && matchQuantity) r.Quantity = convertQuantity(dr[columns[2]].ToString());
-                        if (columns[3] != -1 && matchPrice) r.Price = toDouble(dr[columns[3]].ToString());
-                        if (columns[4] != -1) r.Discount = dr[columns[4]].ToString(); else { r.Discount = ""; }
-                        if (columns[5] != -1 && matchTotalValue) { r.TotalValue = toDouble(dr[columns[5]].ToString()); }
-                        rows.Add(r);
-
-
+                    if (columns[1] != -1) r.Description = dr[columns[1]].ToString();
+                    if (columns[2] != -1 && matchQuantity) r.Quantity = convertQuantity(dr[columns[2]].ToString());
+                    if (columns[3] != -1 && matchPrice) r.Price = toDouble(dr[columns[3]].ToString());
+                    if (columns[4] != -1) r.Discount = dr[columns[4]].ToString(); else { r.Discount = ""; }
+                    if (columns[5] != -1 && matchTotalValue) { r.TotalValue = toDouble(dr[columns[5]].ToString()); }
+                    rows.Add(r);
                 }
 
                 matchCode = false;
@@ -769,7 +773,7 @@ namespace OCR
                     Console.WriteLine(pathToFile);
 
                     findColumnsByName(ex, ref columns, ref indexOf);
- 
+
 
                     displayRows(ex, columns, indexOf, file.ToString(), sonepar);
                 }
@@ -781,7 +785,7 @@ namespace OCR
             }
 
 
-          
+
 
 
 
