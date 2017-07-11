@@ -308,6 +308,43 @@ namespace OCR
             }
         }
 
+        public static double convertQuantity(string row)
+        {
+
+            double convertedValue = 0;
+            bool succes = false;
+
+            try
+            {
+                convertedValue = Convert.ToDouble(row.Replace(",", ".")); ;
+                succes = true;
+            }
+            catch { }
+
+            if (succes) { return convertedValue; }
+            else if (!succes)
+            {
+                char[] chars = row.ToCharArray();
+                string clearedValue = String.Empty;
+
+                foreach (char c in chars)
+                {
+                    if (Char.IsDigit(c) || c.Equals(',') || c.Equals('.')) clearedValue += c;
+                }
+
+                try { return Convert.ToDouble(clearedValue.Replace(",", ".")); }
+                catch { return 0; }
+
+            }
+            else
+            {
+                return 0;
+            }
+
+
+
+        }
+
         static string[] getDataFromSQL(string query, string sqlColumnName)
         {
             string temp;
@@ -520,6 +557,8 @@ namespace OCR
                     }
                 }
 
+                Console.WriteLine("Code {0} {1} \n Qty {2} {3} \n Price {4} {5} \n TV {6} {7} \n\n", matchCode, dr[columns[0]].ToString(),
+                    matchQuantity, dr[columns[2]].ToString(), matchPrice, dr[columns[3]].ToString(), matchTotalValue, dr[columns[5]].ToString());
 
                 if (sonepar && !String.IsNullOrEmpty(dr[columns[2]].ToString()) && !String.IsNullOrEmpty(dr[columns[3]].ToString()) && excel.ds.Tables[0].Rows.IndexOf(dr) > indexOf)
                 {
@@ -571,12 +610,13 @@ namespace OCR
                 }
                 else if ((matchPrice && matchQuantity) || (matchQuantity && matchTotalValue))
                 {
-
+                    Console.WriteLine("Pierwsza");
                     r = new Row();
-                    try
-                    {
+
+                        Console.WriteLine("Pierwsza 2");
                         if (columns[0] != -1 && !String.IsNullOrEmpty(dr[columns[0]].ToString())) { r.Code = dr[columns[0]].ToString(); }
-                        else if (!matchCode)
+
+                        else if (!matchCode && columns[1] != -1)
                         {
                             foreach (String patt in pattCode)
                             {
@@ -587,23 +627,18 @@ namespace OCR
                                     r.Code = mtch.Groups[1].Value;
                                     break;
                                 }
-                            }                    
+                            }
                         }
                         else { r.Code = ""; }
 
                         if (columns[1] != -1) r.Description = dr[columns[1]].ToString();
-                        if (columns[2] != -1 && matchQuantity) r.Quantity = Convert.ToDouble(dr[columns[2]].ToString().Replace(",", "."));
+                        if (columns[2] != -1 && matchQuantity) r.Quantity = convertQuantity(dr[columns[2]].ToString());
                         if (columns[3] != -1 && matchPrice) r.Price = toDouble(dr[columns[3]].ToString());
                         if (columns[4] != -1) r.Discount = dr[columns[4]].ToString(); else { r.Discount = ""; }
                         if (columns[5] != -1 && matchTotalValue) { r.TotalValue = toDouble(dr[columns[5]].ToString()); }
                         rows.Add(r);
 
-                    }
-                    catch
-                    {
-                        rows.Add(r);
-                        continue;
-                    }
+
                 }
 
                 matchCode = false;
@@ -618,7 +653,82 @@ namespace OCR
             insertDataToSQL(rows, docName);
         }
 
+        static void findColumnsByPattern(MS_excel excel, int[] columns, int indexOf)
+        {
+            List<int> indexList = new List<int>();
+            int[] missingColumns;
+            string[] patterns = { "" };
+            Regex regex;
 
+            //Getting indexes of missing columns
+            for (int i = 0; i < columns.Length; i++) { if (columns[i] == -1) { indexList.Add(i); } }
+            missingColumns = indexList.ToArray();
+
+            if (!(missingColumns.Length == 0))
+            {
+                string[] pattCode = getDataFromSQL("SELECT * FROM Patterns WHERE ColumnName = 'Code'", "Pattern");
+                string[] pattDescription = getDataFromSQL("SELECT * FROM Patterns WHERE ColumnName = 'Description'", "Pattern");
+                string[] pattQuantity = getDataFromSQL("SELECT * FROM Patterns WHERE ColumnName = 'Quantity'", "Pattern");
+                string[] pattPrice = getDataFromSQL("SELECT * FROM Patterns WHERE ColumnName = 'Price'", "Pattern");
+                string[] pattDiscount = getDataFromSQL("SELECT * FROM Patterns WHERE ColumnName = 'Discount'", "Pattern");
+                string[] pattTotalValue = getDataFromSQL("SELECT * FROM Patterns WHERE ColumnName = 'TotalValue'", "Pattern");
+
+
+                foreach (DataRow dr in excel.ds.Tables[0].Rows)
+                {
+                    for (int i = 0; i < columns.Length; i++)
+                    {
+                        switch (missingColumns[i])
+                        {
+                            case 0:
+                                patterns = getDataFromSQL("SELECT * FROM Patterns WHERE ColumnName = 'Code'", "Pattern");
+                                break;
+                            case 1:
+                                patterns = getDataFromSQL("SELECT * FROM Patterns WHERE ColumnName = 'Description'", "Pattern");
+                                break;
+                            case 2:
+                                patterns = getDataFromSQL("SELECT * FROM Patterns WHERE ColumnName = 'Quantity'", "Pattern");
+                                break;
+                            case 3:
+                                patterns = getDataFromSQL("SELECT * FROM Patterns WHERE ColumnName = 'Price'", "Pattern");
+                                break;
+                            case 4:
+                                patterns = getDataFromSQL("SELECT * FROM Patterns WHERE ColumnName = 'Discount'", "Pattern");
+                                break;
+                            case 5:
+                                patterns = getDataFromSQL("SELECT * FROM Patterns WHERE ColumnName = 'TotalValue'", "Pattern");
+                                break;
+                            default:
+                                break;
+                        }
+
+                        bool found = false;
+
+                        foreach (string patt in patterns)
+                        {
+                            regex = new Regex(patt);
+
+                            for (int j = 0; j < excel.ds.Tables[0].Columns.Count - 1; j++)
+                            {
+                                // Line is not empty && not found yet && pattern matches
+                                if (!found && !(string.IsNullOrEmpty(dr[j].ToString())) && regex.IsMatch(dr[j].ToString()))
+                                {
+                                    columns[missingColumns[i]] = j;
+                                    Console.WriteLine("test {0}", columns[missingColumns[i]]);
+                                    found = true;
+                                }
+                                else { continue; }
+                            }
+
+                        }
+
+
+                    }
+                }
+            }
+
+
+        }
 
         static void Main(string[] args)
         {
@@ -659,7 +769,7 @@ namespace OCR
                     Console.WriteLine(pathToFile);
 
                     findColumnsByName(ex, ref columns, ref indexOf);
-
+ 
 
                     displayRows(ex, columns, indexOf, file.ToString(), sonepar);
                 }
@@ -671,19 +781,7 @@ namespace OCR
             }
 
 
-            //string[] pattCode = getDataFromSQL("SELECT * FROM Patterns WHERE ColumnName = 'Code'", "Pattern");
-            //MS_excel excel = new MS_excel(@"C:\[OCR] hotFolders\sebastian2\done\TEst\0000242004_kod w opisie.xls", "Sheet1", false);
-            //foreach (DataRow dr in  excel.ds.Tables[0].Rows) 
-            //{
-            //    string pattern = "(" + "[a-zA-Z0-9]{2}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{3}" + ")";
-            //    string test = "PX-0024-OXI SIROS E27 IP23 100W";
-            //    Match mtch = Regex.Match(test, pattern);
-            //    //Console.WriteLine(pattern);
-            //    if (mtch.Success) Console.WriteLine(mtch.Groups[1].Value);
-
-
-            //}
-
+          
 
 
 
