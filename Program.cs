@@ -416,12 +416,13 @@ namespace OCR
 
         }
 
-        static void findColumnsByName(MS_excel excel, ref int[] columns, ref int indexOf)
+        static void findColumnsByName(MS_excel excel, ref int[] columns, ref int indexOf, ref bool sonepar)
         {
             string[] dictionary = { "" };
             bool found = false;
             bool indexOfBegining = false;
             string[] columnNames = { "Code", "Description", "Quantity", "Price", "Discount", "TotalValue" };
+            Regex reg = new Regex("sonepar");
 
 
             for (int i = columns[0]; i < columns.Length; i++)
@@ -458,6 +459,8 @@ namespace OCR
 
                     for (int k = 0; k < excel.ds.Tables[0].Columns.Count; k++)
                     {
+                        if (reg.IsMatch(dr[k].ToString())) sonepar = true;
+
                         foreach (string term in dictionary)
                         {
                             if (!found && dr[k].Equals(term))
@@ -505,7 +508,7 @@ namespace OCR
         }
 
         //Special value = true should be used for SONEPAR's invoices
-        static void displayRows(MS_excel excel, int[] columns, int indexOf, string file, bool sonepar = false)
+        static void getRows(MS_excel excel, int[] columns, int indexOf, string file, bool sonepar = false)
         {
 
             Row r;
@@ -628,10 +631,10 @@ namespace OCR
                             }
                             else
                             {
-                                
+
                                 if (dr[columns[1]].ToString().Length > 29) r.Code = dr[columns[1]].ToString().Substring(0, 28);
-                                else {r.Code = dr[columns[1]].ToString().Substring(0, dr[columns[1]].ToString().Length); }
-                                
+                                else { r.Code = dr[columns[1]].ToString().Substring(0, dr[columns[1]].ToString().Length); }
+
                             }
                         }
                     }
@@ -758,8 +761,6 @@ namespace OCR
                 string pathToFile = String.Concat(directory, file);
                 bool sonepar = false;
 
-                if (file.Name.ToString().Contains("sonepar")) { sonepar = true; }
-
                 try
                 {
 
@@ -772,10 +773,9 @@ namespace OCR
 
                     Console.WriteLine(pathToFile);
 
-                    findColumnsByName(ex, ref columns, ref indexOf);
+                    findColumnsByName(ex, ref columns, ref indexOf, ref sonepar);
+                    getRows(ex, columns, indexOf, file.ToString(), sonepar);
 
-
-                    displayRows(ex, columns, indexOf, file.ToString(), sonepar);
                 }
                 catch (Exception e)
                 {
@@ -783,10 +783,6 @@ namespace OCR
                     continue;
                 }
             }
-
-
-
-
 
 
         }
